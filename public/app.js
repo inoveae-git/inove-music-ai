@@ -1,0 +1,1 @@
+async function go(){let tema=tema.value||'sonho';let estilo=document.getElementById('estilo').value;let r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tema,estilo})});let j=await r.json();out.textContent=j.letra;}

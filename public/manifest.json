@@ -1,0 +1,8 @@
+{
+  "name": "Inove Music AI",
+  "short_name": "InoveMusic",
+  "display": "standalone",
+  "start_url": "/",
+  "theme_color": "#111",
+  "background_color": "#111"
+}
