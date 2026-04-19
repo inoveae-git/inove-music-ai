@@ -3,6 +3,6 @@
   "short_name": "InoveMusic",
   "display": "standalone",
   "start_url": "/",
-  "theme_color": "#111",
-  "background_color": "#111"
+  "theme_color": "#111111",
+  "background_color": "#111111"
 }

@@ -1,2 +1,2 @@
 # Inove Music AI
-Deploy no Vercel.
+Projeto corrigido para Vercel.
