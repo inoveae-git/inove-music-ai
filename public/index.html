@@ -1,40 +1,63 @@
 <!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Inove Music AI V3.1</title>
+<title>Inove Music AI V3.2</title>
 <style>
-body{background:#111;color:#d4af37;font-family:Arial;max-width:520px;margin:auto;padding:20px}
+body{background:#111;color:#d4af37;font-family:Arial;max-width:540px;margin:auto;padding:20px}
 input,select,button{width:100%;padding:12px;margin:8px 0;border:none;border-radius:10px}
 button{background:#d4af37;color:#111;font-weight:bold}
-#msg{margin:10px 0;color:#fff}
-</style></head>
-<body>
-<h1>🎵 Inove Music AI V3.1</h1>
+pre{background:#222;color:#fff;padding:12px;border-radius:10px;white-space:pre-wrap}
+</style></head><body>
+<h1>🎵 Inove Music AI V3.2</h1>
 <input id='tema' placeholder='Tema da música'>
-<select id='estilo'><option>pop</option><option>funk</option><option>trap</option><option>melody</option></select>
+<select id='estilo'>
+<option value='funk'>Funk BR</option>
+<option value='trap'>Trap</option>
+<option value='melody'>Melody</option>
+<option value='pop'>Pop</option>
+</select>
 <button onclick='go()'>PRODUZIR SOM</button>
 <div id='msg'></div>
+<pre id='txt'></pre>
 <audio id='player' controls style='width:100%;display:none'></audio>
 <script>
-async function go(){
- msg.textContent='Gerando áudio... aguarde';
- player.style.display='none';
- const r=await fetch('/api/generate',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({tema:tema.value,estilo:estilo.value})
- });
- if(!r.ok){
-   try{
-     const j=await r.json();
-     msg.textContent=j.message;
-   }catch(e){
-     msg.textContent='Erro ao gerar';
-   }
-   return;
+let ctx;
+function beat(style){
+ ctx=new (window.AudioContext||window.webkitAudioContext)();
+ let base=120;
+ if(style==='trap') base=70;
+ if(style==='funk') base=130;
+ if(style==='melody') base=95;
+ let t=ctx.currentTime;
+ for(let i=0;i<12;i++){
+   let o=ctx.createOscillator(), g=ctx.createGain();
+   o.type=(style==='melody')?'sine':'square';
+   o.frequency.value=(i%2?base:base+40);
+   g.gain.value=.02;
+   o.connect(g); g.connect(ctx.destination);
+   o.start(t+i*.2); o.stop(t+i*.2+.08);
  }
- const blob=await r.blob();
- player.src=URL.createObjectURL(blob);
- player.style.display='block';
- msg.textContent='Pronto!';
 }
-</script>
-</body></html>
+function letra(tema,estilo){
+ return `${tema.toUpperCase()}\nNo clima ${estilo} eu vou mandar\nTransforme ideias em som no ar\nHoje ninguém vai me parar\nInove Music veio pra tocar`;
+}
+async function go(){
+ const tema=document.getElementById('tema').value||'vitória';
+ const estilo=document.getElementById('estilo').value;
+ msg.textContent='Tentando IA externa...';
+ player.style.display='none';
+ txt.textContent='';
+ const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tema,estilo})});
+ const ct=r.headers.get('content-type')||'';
+ if(ct.includes('audio')){
+   const blob=await r.blob();
+   player.src=URL.createObjectURL(blob);
+   player.style.display='block';
+   msg.textContent='Áudio real gerado!';
+   txt.textContent=letra(tema,estilo);
+ }else{
+   const j=await r.json();
+   msg.textContent=j.message;
+   beat(estilo);
+   txt.textContent=letra(tema,estilo);
+ }
+}
+</script></body></html>
